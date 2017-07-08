@@ -8,17 +8,20 @@ module restoration(
 	reset_n,
 	Restorated_Pulse,
 	Pulser_Trigger_Request,
-	Pulse_Measurement_Done
+	Pulse_Measurement_Done,
+	Pulse_Propagation_Counter,
+	Pulser_IC_Error
    );
 	
 output reg Pulse_Measurement_Done;
+output reg [15:0] Pulse_Propagation_Counter;
 	
 input clk;
 input reset_n;
 input Restorated_Pulse;
 input Pulser_Trigger_Request;
+input Pulser_IC_Error;
 
-reg [15:0] Pulse_Propagation_Counter;
 reg Pulse_Counter_Enable;
 
 reg Pulser_Trigger_Request_d;
@@ -72,6 +75,12 @@ begin
 				Pulse_Propagation_Counter <= 16'h0;	
 				Pulse_Counter_Enable <= 1'b1;
 				Pulse_Measurement_Done <= 1'b0;	
+			end
+		else if (Pulser_IC_Error)
+			begin
+				Pulse_Counter_Enable <= 1'b0;
+				Pulse_Measurement_Done <= 1'b0;
+				Pulse_Propagation_Counter <= 16'h0;	
 			end
 		else if (Restorated_Pulse_der) 
 			begin
