@@ -10,7 +10,8 @@ module sync(
    // Inputs
 	clk_408MHz,
 	clk_24MHz,
-	rst_n
+	rst_n, 
+	Controller_FPGA_Reset
    ) ;
 	
 output reg rst_n_sync_24MHz;	
@@ -18,10 +19,18 @@ output reg rst_n_sync_408MHz;
 input		clk_408MHz;
 input		clk_24MHz;
 input 	rst_n ;
+input 	Controller_FPGA_Reset;
 
-always @ (posedge clk_408MHz or negedge rst_n) 
+reg Global_Reset_Signal;
+
+always @ (posedge clk_408MHz) 
 begin	
-	if (!rst_n) begin
+	Global_Reset_Signal <= rst_n && Controller_FPGA_Reset;
+end
+
+always @ (posedge clk_408MHz or negedge Global_Reset_Signal) 
+begin	
+	if (!Global_Reset_Signal) begin
 		rst_n_sync_408MHz <= 1'b0;
 	end
 	else begin
@@ -29,9 +38,9 @@ begin
 	end
 end
 
-always@(posedge clk_24MHz or negedge rst_n) 
+always@(posedge clk_24MHz or negedge Global_Reset_Signal) 
 begin	
-	if (!rst_n) begin
+	if (!Global_Reset_Signal) begin
 		rst_n_sync_24MHz <= 1'b0;
 	end
 	else begin

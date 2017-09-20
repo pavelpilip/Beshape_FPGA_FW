@@ -84,7 +84,7 @@ begin
 			
 			VALIDATE_PULSE_OUT: 	        
 				begin
-					if (Out_Pulse_Measure) 
+					/*if (Out_Pulse_Measure) // REMOVE THE COMMENT WHEN PULSE SWING WILL BE DECIDED
 						begin 
 							Pulse_Width_Counter <= Pulse_Width_Counter + 12'h1;
 							state <= PULSE_WIDTH_DELAY; 
@@ -92,8 +92,12 @@ begin
 					else 
 						begin
 							Pulser_IC_Error <= 1'b1;
+							Pulse_Control_Out <= 1'b0;	
 							state <= IDLE;
-						end
+						end*/
+						
+						Pulse_Width_Counter <= Pulse_Width_Counter + 12'h1;
+						state <= PULSE_WIDTH_DELAY; 
 				end
 
 			PULSE_WIDTH_DELAY:  	        

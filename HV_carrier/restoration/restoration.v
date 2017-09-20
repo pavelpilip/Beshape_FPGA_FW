@@ -6,21 +6,25 @@ module restoration(
    // Inputs
 	clk,
 	reset_n,
+	Reset_All_Errors,
 	Restorated_Pulse,
 	Pulser_Trigger_Request,
 	Pulse_Measurement_Done,
 	Pulse_Propagation_Counter,
-	Pulser_IC_Error
+	Pulser_IC_Error,
+	Tissue_Temperature_Measurement_Error_Flag
    );
 	
 output reg Pulse_Measurement_Done;
 output reg [15:0] Pulse_Propagation_Counter;
+output reg Tissue_Temperature_Measurement_Error_Flag;
 	
 input clk;
 input reset_n;
 input Restorated_Pulse;
 input Pulser_Trigger_Request;
 input Pulser_IC_Error;
+input Reset_All_Errors;
 
 reg Pulse_Counter_Enable;
 
@@ -67,9 +71,12 @@ begin
 		Pulse_Propagation_Counter <= 16'h0;	
 		Pulse_Counter_Enable <= 1'b0;
 		Pulse_Measurement_Done <= 1'b0;
+		Tissue_Temperature_Measurement_Error_Flag <= 1'b0;
 	end
   else 
 	begin
+		if (Reset_All_Errors) begin Tissue_Temperature_Measurement_Error_Flag <= 1'b0; end
+	
 		if (Pulser_Trigger_Request_der) 
 			begin 
 				Pulse_Propagation_Counter <= 16'h0;	
@@ -88,7 +95,20 @@ begin
 				Pulse_Measurement_Done <= 1'b1;
 			end
 		
-		if (Pulse_Counter_Enable) Pulse_Propagation_Counter <= Pulse_Propagation_Counter + 16'h1;
+		if (Pulse_Counter_Enable) 
+			begin
+				if (Pulse_Propagation_Counter == 16'hFFFF)
+					begin
+						Pulse_Counter_Enable <= 1'b0;
+						Pulse_Measurement_Done <= 1'b0;
+						Pulse_Propagation_Counter <= 16'h0;
+						Tissue_Temperature_Measurement_Error_Flag <= 1'b1;
+					end
+				else
+					begin
+						Pulse_Propagation_Counter <= Pulse_Propagation_Counter + 16'h1;
+					end
+			end
 
 	end  		
 end			

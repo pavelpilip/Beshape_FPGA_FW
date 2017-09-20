@@ -36,6 +36,7 @@ module top(
 	
 	input clk_24mhz, 
 	input Restorated_Pulse_In,
+	input Controller_FPGA_Reset,
 	input reset_n,
 	input SPI_Bus_CS,
 	input SPI_Bus_CLK,
@@ -78,6 +79,7 @@ wire Summarized_Interrupt_Signal;
 wire [15:0] Tissue_Temperature_Value;
 wire Reset_All_Errors;
 wire Pulser_IC_Error;
+wire Tissue_Temperature_Measurement_Error_Flag;
 wire rst_n_sync_24MHz;
 wire rst_n_sync_408MHz;
 wire clk_408MHz;
@@ -160,6 +162,7 @@ sync sync_c(
    // Inputs
 	.clk_408MHz(clk_408MHz),
 	.clk_24MHz(clk_24mhz_out),
+	.Controller_FPGA_Reset(Controller_FPGA_Reset),
 	.rst_n(reset_n)
    ) ;
 	
@@ -178,11 +181,13 @@ pulser pulser_inst (
 restoration	restoration_inst (
 	.clk (clk_408MHz),
 	.reset_n (rst_n_sync_408MHz),
+	.Reset_All_Errors(Reset_All_Errors),
 	.Restorated_Pulse(Restorated_Pulse_In),
 	.Pulser_Trigger_Request(Pulse_Control_Out),
 	.Pulse_Measurement_Done(Pulse_Measurement_Done),
 	.Pulse_Propagation_Counter(Tissue_Temperature_Value),
-	.Pulser_IC_Error(Pulser_IC_Error)
+	.Pulser_IC_Error(Pulser_IC_Error),
+	.Tissue_Temperature_Measurement_Error_Flag(Tissue_Temperature_Measurement_Error_Flag)
 	);
 	
 Amplifier_Switch_Arbiter Amplifier_Switch_Arbiter_inst (
@@ -219,7 +224,8 @@ System_Data_Parser Data_Parser(
 	.P24v_Supply_Status(P24v_Supply_Status),
 	.P48v_Supply_Status(P48v_Supply_Status),
 	.PC_Communication_Status(PC_Communication_Status),
-	.Pulser_IC_Status(Pulser_IC_Error),				
+	.Pulser_IC_Status(Pulser_IC_Error),	
+	.Tissue_Temperature_Measurement_Error_Flag(Tissue_Temperature_Measurement_Error_Flag),
 	.Power_Button_Status(Power_Button_Status),
 	.Emergency_Button_Status(Emergency_Button_Status),
 	.HP_Connection_Status(HP_Connection_Status),
